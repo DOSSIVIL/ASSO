@@ -1,0 +1,37 @@
+version: '3.3'
+
+services:
+  # Service pour le microservice
+  microservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: microservice_commande
+    ports:
+      - "8081:8081"  # Port pour le microservice
+    networks:
+      - commande_net  # Utilisation du réseau interne
+    depends_on:
+      - mysql-db  # Dépendance au service MySQL, pour attendre qu'il soit démarré
+
+  # Service pour la base de données MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql_container
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_DATABASE: commande        # Base de données à créer
+    ports:
+      - "3308:3306"  # Port pour MySQL
+    volumes:
+      - mysql-data:/var/lib/mysql  # Volume pour persister les données
+    networks:
+      - commande_net  # Réseau partagé
+
+networks:
+  commande_net:
+    driver: bridge  # Définition d'un réseau interne spécifique pour les services
+
+volumes:
+  mysql-data:
+    driver: local  # Volume persistant pour MySQL
